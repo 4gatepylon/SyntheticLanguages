@@ -50,4 +50,8 @@ Please feel free to collaborate and add new ideas! PRs are welcome! Help from li
 We are using `mkdocstrings` and `mkdocs`. Deploying is as easy as `mkdocs gh-deploy`. Configuration and docs are in `docs/` and `mkdocs.yml`. Please read the tutorials (https://www.mkdocs.org/getting-started/ then https://mkdocstrings.github.io/python/usage/) to understand how this works.
 
 # Setting up Environment
-The easiest way to do this right now is simply to do `python3 -m venv .venv && source .venv/bin/activate && pip3 install .`. It should install all the requisite dependencies and you should be ready to go. More tutoirals on jupyter and docker deployments will be shown here later.
+1. Install poetry
+2. `poetry install`
+3. Do your thing.
+
+TODO(Adriano) find a solution to not working on Mac... (maybe it was that we needed cuda?)
