@@ -1,0 +1,96 @@
+site_name: "Synthetic Languages"
+repo_url: https://github.com/4gatepylon/synthetic_languages
+repo_name: 4gatepylon/synthetic_languages
+# edit_uri: edit/main/docs/
+
+# Credit to where credit is due: we use
+# - Material theme from: https://github.com/squidfunk/mkdocs-material?tab=readme-ov-file
+# - Visual Inspiration from: https://github.com/UFO-101/auto-circuit/blob/main/mkdocs.yml
+theme:
+  name: material
+  font:
+    text: Rubik
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+  features:
+    - content.action.edit
+    - content.action.view
+    - navigation.tabs
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.path
+    - search.suggest
+    - search.highlight
+    - navigation.top
+    - navigation.sections
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+# TODO(Adriano) what is this? I think it'll add syntax highlighting (etc...) to our markdown...
+# markdown_extensions:
+#   - pymdownx.tabbed:
+#       alternate_style: true
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+      # base_path: "."
+  - pymdownx.superfences
+
+watch:
+  # During development, update the site any time any file in this directory changes so that we can
+  # get updated docs (because it's reading in docstrings).
+  - synthetic_languages
+
+plugins:
+  - search
+  - gen-files:
+      scripts:
+      - docs/gen_ref_pages.py
+  - mkdocstrings:
+      custom_templates: null
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_submodules: true
+            show_root_heading: true
+            group_by_category: true
+            show_category_heading: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            show_inheritance_diagram: true
+            merge_init_into_class: true
+            # show_if_no_docstring: true
+            separate_signature: true
+            show_signature_annotations: true
+            signature_crossrefs: true

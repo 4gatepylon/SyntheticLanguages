@@ -2,78 +2,12 @@
 ## Usage
 Currently `synthetic_languages` is a `pip` installable. You can get it using `pip install synthetic_languages`.
 
-Usage is pretty simple:
-```python
-# Can a 1-layer transformer always get optimal accuracy on a Markov Chain input? Let's find out by training on
-# 1M tokens from a made up (arbitrary) language.
-
-from synthetic_languages import MarkovLanguage, SmallTransformer, TrainingRun
-
-my_lang = MarkovLangauge(
-    # Low entropy means this is close to deterministic.
-    num_tokens=1024,
-    # Use a gaussian distribution to sample entropy for each of 1024 columns. Each entropy value is first sampled
-    # from a gaussian of average 4 bits and with >= 95% chance of sampling in [0, 8] bits. If it's negative it gets set
-    # to zero. Every column will be a different probability distribution with that value of entropy.
-    entropy_distribution='gaussian',
-    negative_entropy_mapping='zero',
-    average_entropy=4,
-    entropy_stdev=2,
-    entropy_units='bits',
-    # Your langauge name can be used to identify it for experiments and recognize its definition file
-    language_name='my_experiment',
-    language_author='my_name'
-    # Markov languages have markov-chain (FSM) - specific parameters
-    connected=True,
-    ergodic=True
-)
-# You should save your language to a file so you can reuse it for comparisons (and reload it later)
-# The language definition has metadata, and in this case, the state machine transition probabilities in matrix
-# Notation
-my_lang.save('my_lang.lang')
-
-# You can create datasets from your language. Each dataset is one or more files. Each different language type class
-# has a different language generation process. The MarkovLanguage class, specifically, just follows a random path along
-# the markov chain states. You can start from a random "letter" and re-sample (restart) from a random letter (for example 
-# if your FSM were not ergodic, though that doesn't apply here).
-my_lang.create_dataset(
-    'my_lang_dataset.lang',
-    initial_sample_strategy='uniform',
-    num_samples=1,
-    num_tokens_per_sample=1_000_000
-)
-
-# You can get a dataloader and we have a simple class of small transformers for ease of testing.
-# Here we try with a 1-layer transformer that just down-projects into an attention layer, up--projects, and then
-# up-projects again into logits. Because transformers can supposedly learn bigram statistics this might be
-# something you'd want to confirm with.
-dataloader_train, dataloader_test = my_lang.load_train_test(
-    'my_lang_dataset.lang',
-    train_amount=0.8,
-    embedding_strategy='one-hot',
-    batch_size=512,
-    shuffle=True
-)
-model = SmallTransformer(num_layers=1, use_mlp=False)
-# We provide a light wrapper around common training code so you don't have to write it yourself. If you want
-# something more involved that is also possible, since the model is an torch.nn.Module (and the data is in a file
-# regardless, at the end of the day)
-training_run = TrainingRun(
-    num_epochs=100,
-    log_every=5
-    save_every=5
-    output_folder='.my_experiment'
-    loss='nll',
-    dataloader_train=dataloader_train,
-    dataloader_test=dataloader_test
-)
-training_run.run()
-```
+For a tutorial on how to use this library check out our documentation: .
 
 ## What is this?
 This is a library and set of tools to easily form synthetic languages of varying difficulties for the purpose of understanding the capabilities of the current generation of large language models.
 
-Having a ground truth of some form can be very helpful when trying to do (mechanistic) interpretability (MI) on (large) language models. We do not know how to model the english language very deeply (at least AFAIK), so it is hard to get a good sense for what language models _might_ be learning to do: how they are actually _processing_ the input they recieve to predict tokens. 
+Having a ground truth of some form can be very helpful when trying to do (mechanistic) interpretability (MI) on (large) language models. We do not know how to model the english language very deeply (at least AFAIK), so it is hard to get a good sense for what language models _might_ be learning to do: how they are actually _processing_ the input they recieve to predict tokens.
 
 Some research (https://transformer-circuits.pub/2023/monosemantic-features) has shown that it is possible to find features that correspond to known concepts, and others (i.e. https://openreview.net/forum?id=NpsVSN6o4ul) have found _circuits_ with mild success. Because MI is hard, people have also tried to do circuit analysis on algorithmic tasks (i.e. https://arxiv.org/pdf/2306.17844) and some made up sequences (i.e. https://www.youtube.com/watch?v=yo4QvDn-vsU&ab_channel=NeelNanda for the purposes of understanding the capabilities of transformers). This latter approach appears to be easier than doing MI directly on models of real language (for obvious reasons) but it's not as useful for understanding real world behavior.
 
@@ -111,3 +45,9 @@ The `synthetic_languages` package is very new and a work in progress. Currently 
 - Languages that are subsets of existing languages (such as english), maybe even animal sounds or something else
 
 Please feel free to collaborate and add new ideas! PRs are welcome! Help from linguists and others with deep language would also be appreciated.
+
+# Documentation
+We are using `mkdocstrings` and `mkdocs`. Deploying is as easy as `mkdocs gh-deploy`. Configuration and docs are in `docs/` and `mkdocs.yml`. Please read the tutorials (https://www.mkdocs.org/getting-started/ then https://mkdocstrings.github.io/python/usage/) to understand how this works.
+
+# Setting up Environment
+The easiest way to do this right now is simply to do `python3 -m venv .venv && source .venv/bin/activate && pip3 install .`. It should install all the requisite dependencies and you should be ready to go. More tutoirals on jupyter and docker deployments will be shown here later.

@@ -2,12 +2,13 @@ import abc
 import pydantic
 import enum
 from typing import Union, List
+
 ### THOUGHTS ON SYNTHETIC LANGUAGES ###
 # Synthetic Languages has a broad scope but for the initial realease it basically just hopes to support traversals on graphs (i.e. MCs/FSMs) and
 # group operations (which, yes, these are graphs but are mathematically meaningful and interesting to people). We should make sure that these cover
 # skip bigrams and stuff like that: https://www.youtube.com/watch?v=yo4QvDn-vsU&list=LL&index=36&t=4s&ab_channel=NeelNanda, modular arithmetic,
 # the stuff from this repository including its visualization.
-# 
+#
 # We promise to make description, training, and storage + creation of initial plots and tables very easy (including linear probes and the like i.e. for
 # this sort of belief state stuff). Interpretability beyond that is scoped OUT.
 # Search algorithms are scoped OUT.
@@ -60,8 +61,10 @@ from typing import Union, List
 #   between parts in other ways (i.e. a simple hierarchical split is not always going to be the simplest/best way to see this). It would also be nice to
 #   have it learn about accumulation and different stuff like that.
 
+
 class CanonicalAlphabetDecodingStrategy(enum.Enum):
     LIST_ELEMENT = "LIST_ELEMENT"
+
 
 class LanguageSpecification(pydantic.BaseModel):
     """
@@ -75,10 +78,14 @@ class LanguageSpecification(pydantic.BaseModel):
 
     Right now this is for regular languages.
     """
+
     name: str
     alphabet_length: int
     canonical_alphabet: Union[List[str], str]
-    canonical_alphabet_decoding_strategy: CanonicalAlphabetDecodingStrategy = CanonicalAlphabetDecodingStrategy.LIST_ELEMENT
+    canonical_alphabet_decoding_strategy: CanonicalAlphabetDecodingStrategy = (
+        CanonicalAlphabetDecodingStrategy.LIST_ELEMENT
+    )
+
 
 class Language(abc.ABC):
     """
@@ -86,7 +93,9 @@ class Language(abc.ABC):
     to character. It is both a generating process (as how we often view Markov Chains) AND a verification process (as how we
     often view regular expressions and context free grammars).
     """
+
     name: str
+
 
 ### Combinations of many different types of languages ###
 # class CrossProductLanguage(Language):
@@ -96,8 +105,23 @@ class Language(abc.ABC):
 class RegularLanguage(Language):
     pass
 
+
 # class ContextFreeLanguage(Language):
 #     pass # NOTE not implemented yet and not clear how to do the computations of state
 
 # class AlgebraicGroup(Language):
 #     pass # TODO(Adriano) not exactly clear what the question is here
+
+
+# TODO
+# 1. Docs are up and running and read everything from python
+# 2. Bugs fixed, tests added, working with epsilon transformers
+# 3. Move to poetry
+# 4. Add makefiles to make the testing and general management easy
+# 5. Make sure docs have proper syntax highlighting and cover everything
+# 6. Better build system like poetry?
+# 7. Create a docker-runnable version: https://github.com/UFO-101/auto-circuit/blob/main/Dockerfile
+# 8. Run a handful of experiments
+# 9. Setup language specification system and integrations with interpretability tooling
+# 10. Make sure the guides and jupyter notebooks work
+# 11. Make sure all CI/CD is running properly
