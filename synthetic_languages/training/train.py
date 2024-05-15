@@ -1,17 +1,18 @@
-import fire # type: ignore
 import pathlib
 import random
+
+import fire  # type: ignore
 import numpy as np
 import torch
-from tqdm import tqdm
 from torch.utils.data import DataLoader
-from transformer_lens import HookedTransformer # type: ignore
+from tqdm import tqdm
+from transformer_lens import HookedTransformer  # type: ignore
 
 from synthetic_languages.persistence import Persister
 from synthetic_languages.training.configs.training_configs import (
-    TrainConfig,
-    ProcessDatasetConfig,
     Log,
+    ProcessDatasetConfig,
+    TrainConfig,
 )
 
 # TODO: Bug of outputting num_of_tokens_trained on rather than num_of_tokens_seen
@@ -21,7 +22,8 @@ from synthetic_languages.training.configs.training_configs import (
 # TODO: Use logger library for logging
 # TODO: Make Log into a singleton
 # TODO: Add TQDM to all of this
-# TODO: Generalize train_model so that it doesn't depend on the HookedTransformer internal loss function
+# TODO: Generalize train_model so that it doesn't depend on the HookedTransformer
+#     internal loss function
 # TODO: move _check_if_action_batch asserts to a config validator
 # TODO: Add option to resume from checkpoint
 
@@ -60,11 +62,12 @@ def _check_if_action_batch(
     perform_action_every_n_batches = perform_action_every_n_tokens // tokens_per_batch
     return (batch_idx + 1) % perform_action_every_n_batches == 0
 
+
 def _evaluate_model(
     model: HookedTransformer,
     eval_dataloader: DataLoader,
     device: torch.device,
-    log: Log
+    log: Log,
 ) -> Log:
     with torch.no_grad():
         for input_data, target_data in tqdm(eval_dataloader, desc="Eval Loop"):
@@ -87,10 +90,7 @@ def _evaluate_log_and_persist(
         sequence_length=model.cfg.n_ctx, train=False
     )
     _evaluate_model(
-        model=model,
-        eval_dataloader=eval_dataloader,
-        device=device,
-        log=log
+        model=model, eval_dataloader=eval_dataloader, device=device, log=log
     )
 
     if verbose:
@@ -100,6 +100,7 @@ def _evaluate_log_and_persist(
     log.reset()
     persister.save_model(model, tokens_trained)
     return log
+
 
 def train_model(config: TrainConfig) -> HookedTransformer:
     device = torch.device(
@@ -116,10 +117,12 @@ def train_model(config: TrainConfig) -> HookedTransformer:
         sequence_length=model.cfg.n_ctx, train=True
     )
 
-    persister = config.persistance.init()
+    persister = config.persistence.init()
     log = config.init_logger()
     model.train()
-    for batch_idx, (input_data, target_data) in enumerate(tqdm(train_dataloader, desc="Train Loop")):
+    for batch_idx, (input_data, target_data) in enumerate(
+        tqdm(train_dataloader, desc="Train Loop")
+    ):
         input_data, target_data = input_data.to(device), target_data.to(device)
         loss = model(input_data, return_type="loss")
         log.update_metrics(train_or_test="train", loss=loss.item())
@@ -135,7 +138,7 @@ def train_model(config: TrainConfig) -> HookedTransformer:
         )
 
         if _check_if_action_batch(
-            perform_action_every_n_tokens=config.persistance.checkpoint_every_n_tokens,
+            perform_action_every_n_tokens=config.persistence.checkpoint_every_n_tokens,
             batch_size=config.dataset.batch_size,
             batch_idx=batch_idx,
             sequence_len=config.model.n_ctx,
@@ -171,6 +174,7 @@ def train_model(config: TrainConfig) -> HookedTransformer:
 def _main(config_path: pathlib.Path):
     config: TrainConfig = TrainConfig.from_yaml(config_path)
     train_model(config)
+
 
 if __name__ == "__main__":
     fire.Fire(_main)

@@ -9,12 +9,14 @@ import mkdocs_gen_files
 
 from synthetic_languages.utils.misc import repo_path_to_abs_path
 
-
 # Get $(pwd) as abspath
 root = repo_path_to_abs_path(".")
 assert root.is_dir()
 # TODO(Adriano) not sure what the desired behavior is here
-# assert root.as_posix().endswith("synthetic_languages") or root.as_posix().endswith("synthetic_languages/")
+# assert (
+#     root.as_posix().endswith("synthetic_languages") or
+#     root.as_posix().endswith("synthetic_languages/")
+# )
 
 package_name = "synthetic_languages"
 src = repo_path_to_abs_path(package_name)

@@ -1,11 +1,11 @@
 # I am an about page
 
-## Sensu nequiquam ore
+## Sensu nequiquam or
 
 Lorem markdownum dixi solent enim sidus luminis qui pallebant tantos confessa,
 carica manebit dicturus velocior tecum, fata. Cui virga nescio nec longa feroces
 detulit uno miratur eandem secus, demisit serta, trepidare. Auctore exit *pugna
-Athenae digreditur* solum; vultibus rostro tamen nitenti felix. Cetera quoque,
+Athenae digreditur* solemn; vultibus rostro tamen nitenti felix. Cetera quoque,
 donasse illis non felici visa est, signa manu paventem minuendo acris, prohibent
 [costis](http://operum.org/nigri); hac.
 
@@ -28,7 +28,7 @@ sonabat orta; ordine veteres vagantes incanduit.
 
 ## Crinis est siqua incola reliquit pigre in
 
-Super corpora portasse: quia **nil** guttur Theseus nam longius corpora iterum,
+Super corpora portasse: quia **nil** guttur Theseus name longius corpora iterum,
 est oriens fiducia fallebat. Cervice refugitque, pulcherrima cognosse vestes iam
 Cyllare pariter ubi sunt conanti.
 
@@ -42,7 +42,7 @@ Cyllare pariter ubi sunt conanti.
     }
 
 Inmemor incessit Hippomenes vigil. Captiva et caelum saepes postquam perdes *sic
-dum cuti* fidemque relatus; et quos miseras subit lacrimabile.
+dumb cuti* fidemque relatus; et quos miseras subit lacrimabile.
 
 Ipsi cum [vera cepit](http://deos-titanida.org/), pacem Helenus quique, neptis:
 mulcendaque vitae; trepidos. Pallas paenitet Cretaeas pia quid fronte primo:

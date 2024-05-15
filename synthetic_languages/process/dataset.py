@@ -1,13 +1,14 @@
+from typing import Dict, Iterable, List, Tuple
+
 import torch
-from itertools import islice
-from typing import Dict, Iterable, Tuple, List
 from jaxtyping import Float
-from torch.utils.data import IterableDataset, DataLoader
+from torch.utils.data import IterableDataset
 
 from synthetic_languages.process.Process import Process
 from synthetic_languages.process.processes import PROCESS_REGISTRY
 
-# TODO: Create a custom dataloader so you don't have to import the collate_function everywehre
+# TODO: Create a custom dataloader so you don't have to import the collate_function
+#     everywehre
 # TODO: Assert they are in the correct vocabulary
 # TODO: Make the dataset parallel distributed (??)
 # TODO: Figure out the device allocation for batching
@@ -32,7 +33,8 @@ class ProcessDataset(IterableDataset):
         process_class = PROCESS_REGISTRY.get(process_name, None)
         if process_class is None:
             raise ValueError(
-                f"{process_name} is not a recognized process. It must be one of the following {PROCESS_REGISTRY.keys()}"
+                f"{process_name} is not a recognized process. "
+                + f"It must be one of the following {PROCESS_REGISTRY.keys()}"
             )
         process: Process = process_class(**process_params)
 

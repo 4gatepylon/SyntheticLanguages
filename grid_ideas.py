@@ -1,4 +1,6 @@
 # Setup jupyter: https://code.visualstudio.com/docs/datascience/jupyter-notebooks
+from pathlib import Path
+
 from epsilon_transformers.training.configs.model_configs import RawModelConfig
 from epsilon_transformers.training.configs.training_configs import (
     LoggingConfig,
@@ -7,8 +9,6 @@ from epsilon_transformers.training.configs.training_configs import (
     ProcessDatasetConfig,
     TrainConfig,
 )
-from epsilon_transformers.training.train import train_model
-from pathlib import Path
 
 if __name__ == "__main__":
     print("Training model on mock config!")
@@ -55,7 +55,8 @@ if __name__ == "__main__":
         n_ctx=10,
         d_head=8,
         n_head=8,
-        # Normally MLP should be HIGHER dimensional... without thinking too much we set it to 4x
+        # Normally MLP should be HIGHER dimensional... without thinking too
+        # much we set it to 4x
         d_mlp=256,
         n_layers=4,
     )
@@ -84,9 +85,9 @@ if __name__ == "__main__":
         model=model_config,
         optimizer=optimizer_config,
         dataset=dataset_config,
-        persistance=persistance_config,
+        persistence=persistance_config,
         logging=LoggingConfig(project_name="z1r-test", wandb=True),
         verbose=True,
         seed=42,
     )
-    train_model(element_config)
+    # train_model(element_config) # TODO(Adriano)

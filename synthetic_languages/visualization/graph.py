@@ -1,17 +1,16 @@
+from typing import Dict, List, Optional
+
 import matplotlib.pyplot as plt
-import networkx as nx # type: ignore
+import networkx as nx  # type: ignore
+import numpy as np
+from jaxtyping import Float
+
 from synthetic_languages.analysis.entropy_analysis import (
     compute_block_entropy,
     compute_conditional_entropy,
     compute_empirical_conditional_entropy,
 )
-from typing import List
-from matplotlib import colors
-import networkx as nx
-import matplotlib.pyplot as plt
-from typing import Optional, Dict
-import numpy as np
-from jaxtyping import Float
+
 
 def determine_layout(G, layout_type):
     """Determine the layout of the graph."""
@@ -39,7 +38,8 @@ def determine_layout(G, layout_type):
 
 def hierarchical_layout(G):
     """Generate a hierarchical layout for the graph."""
-    # This is a simple hierarchical layout and might need adjustments based on the exact graph structure
+    # This is a simple hierarchical layout and might need adjustments based on the exact
+    # graph structure
     levels = {}
     for node in G.nodes():
         if node not in levels:
@@ -51,7 +51,7 @@ def hierarchical_layout(G):
     pos = {}
     for node, level in levels.items():
         # Distribute nodes evenly across the level
-        level_nodes = [n for n, l in levels.items() if l == level]
+        level_nodes = [n for n, lvl in levels.items() if lvl == level]
         level_width = len(level_nodes)
         idx = level_nodes.index(node)
         x = idx - level_width / 2
@@ -100,12 +100,20 @@ def draw_nodes(G, pos, transitory_states, colors, draw_mixed_state):
                 )  # Secondary circle
             else:
                 nx.draw_networkx_nodes(
-                    G, pos, nodelist=[node], node_color=node_color, edgecolors="black"
+                    G,
+                    pos,
+                    nodelist=[node],
+                    node_color=node_color,
+                    edgecolors="black",
                 )
         else:
             node_color = colors["edge_standard"]
             nx.draw_networkx_nodes(
-                G, pos, nodelist=[node], node_color=node_color, edgecolors="black"
+                G,
+                pos,
+                nodelist=[node],
+                node_color=node_color,
+                edgecolors="black",
             )
 
 
@@ -208,9 +216,9 @@ def visualize_graph(
     if draw_edge_labels:
         edge_labels = {}
         for i, j, data in G.edges(data=True):
-            edge_labels[(i, j)] = (
-                f"$\\mathbf{{{data['label']}}}$:{round(data['weight']*100)}%"
-            )
+            edge_labels[
+                (i, j)
+            ] = f"$\\mathbf{{{data['label']}}}$:{round(data['weight']*100)}%"
 
         nx.draw_networkx_edge_labels(
             G, pos, edge_labels=edge_labels, label_pos=0.5, font_size=8
@@ -229,7 +237,12 @@ def plot_block_entropy_diagram(sequence: List[int], max_block_length: int):
     block_entropies = compute_block_entropy(sequence, max_block_length)
 
     plt.figure(figsize=(10, 6))
-    plt.plot(range(1, max_block_length + 1), block_entropies, marker="o", linestyle="-")
+    plt.plot(
+        range(1, max_block_length + 1),
+        block_entropies,
+        marker="o",
+        linestyle="-",
+    )
     plt.xlabel("Block Length (L)")
     plt.ylabel("Block Entropy H(L)")
     plt.title("Block Entropy Diagram")
@@ -243,7 +256,10 @@ def plot_conditional_entropy_diagram(sequence: List[int], max_block_length: int)
 
     plt.figure(figsize=(10, 6))
     plt.plot(
-        range(1, max_block_length + 1), conditional_entropies, marker="o", linestyle="-"
+        range(1, max_block_length + 1),
+        conditional_entropies,
+        marker="o",
+        linestyle="-",
     )
     plt.xlabel("Block Length (L)")
     plt.ylabel("Conditional Entropy H(next symbol | previous L symbols)")
@@ -262,7 +278,10 @@ def plot_empirical_conditional_entropy_diagram(
 
     plt.figure(figsize=(10, 6))
     plt.plot(
-        range(1, max_block_length + 1), conditional_entropies, marker="o", linestyle="-"
+        range(1, max_block_length + 1),
+        conditional_entropies,
+        marker="o",
+        linestyle="-",
     )
     plt.xlabel("Block Length (L)")
     plt.ylabel("Empirical Conditional Entropy H(next symbol | previous L symbols)")
@@ -270,16 +289,22 @@ def plot_empirical_conditional_entropy_diagram(
     plt.grid(True)
     plt.show()
 
-def transition_matrix_to_graph(transition_matrix: Float[np.ndarray, "vocab_len num_states num_states"],
-                               state_names: Optional[Dict[str, int]] = None) -> nx.DiGraph:
+
+def transition_matrix_to_graph(
+    transition_matrix: Float[np.ndarray, "vocab_len num_states num_states"],
+    state_names: Optional[Dict[str, int]] = None,
+) -> nx.DiGraph:
     """
     Convert a transition matrix to a graph.
 
     Parameters:
-    transition_matrix (np.ndarray): The transition matrix of shape (n_outputs, n_states, n_states).
+    transition_matrix (np.ndarray): The transition matrix of shape
+                                    (n_outputs, n_states, n_states).
                                     n_states is the number of states in the machine.
-                                    transition_matrix[i, j, k] is the probability of transitioning from state j to state k on output i.
-    state_names (Dict[str, int], optional): A dictionary mapping state names to state indices.
+                                    transition_matrix[i, j, k] is the probability of
+                                    transitioning from state j to state k on output i.
+    state_names (Dict[str, int], optional):
+                                    A dictionary mapping state names to state indices.
 
     Returns:
     nx.DiGraph: The graph representation of the transition matrix.
@@ -303,11 +328,17 @@ def transition_matrix_to_graph(transition_matrix: Float[np.ndarray, "vocab_len n
     for i in range(n_outputs):
         for j in range(n_states):
             for k in range(n_states):
-                # Add an edge from state j to state k with label i and weight equal to the transition probability
-                # only if the transition probability is not zero
+                # Add an edge from state j to state k with label i and weight equal to
+                # the transition probability only if the transition probability is not
+                # zero
                 if transition_matrix[i, j, k] != 0:
                     from_node = state_names[j] if state_names else j
                     to_node = state_names[k] if state_names else k
-                    G.add_edge(from_node, to_node, label=str(i), weight=transition_matrix[i, j, k])
+                    G.add_edge(
+                        from_node,
+                        to_node,
+                        label=str(i),
+                        weight=transition_matrix[i, j, k],
+                    )
 
     return G

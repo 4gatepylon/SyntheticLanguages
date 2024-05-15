@@ -1,6 +1,5 @@
-from scipy.optimize import minimize_scalar  # type: ignore
-from typing import List
 import numpy as np
+from scipy.optimize import minimize_scalar  # type: ignore
 
 # TODO: Check w/ Adam on which of these to keep
 
@@ -20,8 +19,10 @@ def binary_entropy(p: float) -> float:
 
 def inverse_binary_entropy(target_entropy: float) -> float:
     """Find the probability p corresponding to a given binary entropy value."""
+
     # Objective function: the difference between target entropy and binary entropy of p
-    objective = lambda p: (binary_entropy(p) - target_entropy) ** 2
+    def objective(p):
+        return (binary_entropy(p) - target_entropy) ** 2
 
     # Minimize the objective function to find p
     result = minimize_scalar(objective, bounds=(0, 0.5), method="bounded")

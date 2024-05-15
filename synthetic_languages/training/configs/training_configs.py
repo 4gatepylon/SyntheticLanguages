@@ -1,42 +1,47 @@
-from io import BytesIO
-from typing import Dict, Literal
-from pydantic import BaseModel, model_validator
-import pathlib
-import yaml
-import torch
-from torch.utils.data import DataLoader
-from typing import Union, Optional
-import wandb
-import os
-import dotenv
 import math
-from dataclasses import dataclass, asdict
+import os
+import pathlib
+from dataclasses import asdict, dataclass
+from typing import Dict, Literal, Optional, Union
 
-from synthetic_languages.persistence import LocalPersister, Persister, S3Persister
-from synthetic_languages.process.processes import PROCESS_REGISTRY
+import dotenv
+import torch
+import wandb
+from pydantic import model_validator
+from torch.utils.data import DataLoader
+
+from synthetic_languages.persistence import (
+    LocalPersister,
+    Persister,
+    S3Persister,
+)
 from synthetic_languages.process.dataset import (
     ProcessDataset,
     process_dataset_collate_fn,
 )
+from synthetic_languages.process.processes import PROCESS_REGISTRY
 from synthetic_languages.training.configs.base_config import Config
 from synthetic_languages.training.configs.model_configs import RawModelConfig
 
-
-# TODO: For persistence config, upon init make sure that you check that the relevant environment variables are set
+# TODO: For persistence config, upon init make sure that you check that the relevant
+#     environment variables are set
 # TODO: Generalize the checkpoint_dir option so that it can work w/ S3 outputs
 
 # TODO: Make Config ABS (??)
 # TODO: Turn log input into a dataclass (??)
 # TODO: Have a no persistenc config option
 
-# TODO: Put all the functionality of the log congig into the logger
+# TODO: Put all the functionality of the log config into the logger
 # TODO: Fix the eval_dataloader_ratio_creation
 # TODO: Create a logger & log the file path and intermediary metrics
 # TODO: Add validator to make sure test_split is a fraction
 # TODO: Add validator in Persistence Config to make sure the path is a dir
-# TODO: Add validator in Logging Config to make sure that if we're logging wandb then we're using a project name
-# TODO: Figure out if model seed should be it's own thing or whether we can just use the same seed across
-# TODO: Decide on whether we want to use HookedTransformer exclusively or whether creating our own model class makes the most sense
+# TODO: Add validator in Logging Config to make sure that if we're logging wandb then
+#     we're using a project name
+# TODO: Figure out if model seed should be it's own thing or whether we can just use
+#     the same seed across
+# TODO: Decide on whether we want to use HookedTransformer exclusively or whether
+#     creating our own model class makes the most sense
 
 # TODO: Think if you can make Log DRY
 # TODO: Switch statement code smell with update_loss_metrics
@@ -62,11 +67,14 @@ class OptimizerConfig(Config):
             optimizer = torch.optim.SGD
         else:
             raise ValueError(
-                f"{self.optimizer_type} is not a valid optimizer_type. It must be either 'adam' or 'sgd'"
+                f"{self.optimizer_type} is not a valid optimizer_type. "
+                + "It must be either 'adam' or 'sgd'"
             )
 
         return optimizer(
-            model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay
+            model.parameters(),
+            lr=self.learning_rate,
+            weight_decay=self.weight_decay,
         )
 
 
@@ -84,7 +92,8 @@ class PersistanceConfig(Config):
             return S3Persister(collection_location=self.collection_location)
         else:
             raise ValueError(
-                f"{self.location} is an invalid location value. It must be either 'local' or 's3'"
+                f"{self.location} is an invalid location value. "
+                + "It must be either 'local' or 's3'"
             )
 
 
@@ -140,9 +149,16 @@ class Log:
 
     def persist(self):
         if self.config.wandb:
-            wandb.log({k: v for k, v in asdict(self).items() if v is not None and not isinstance(v, LoggingConfig)})
+            wandb.log(
+                {
+                    k: v
+                    for k, v in asdict(self).items()
+                    if v is not None and not isinstance(v, LoggingConfig)
+                }
+            )
         if self.config.local is not None:
             raise NotImplementedError
+
 
 class LoggingConfig(Config):
     local: Optional[pathlib.Path] = None
@@ -169,18 +185,21 @@ class TrainConfig(Config):
     model: RawModelConfig
     optimizer: OptimizerConfig
     dataset: ProcessDatasetConfig
-    persistance: PersistanceConfig
+    persistence: PersistanceConfig
     logging: LoggingConfig
     seed: int
     verbose: bool
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_model(self):
         dataset_process = self.dataset.process
         if dataset_process:
             process_vocab_len = PROCESS_REGISTRY[dataset_process]().vocab_len
             if self.model.d_vocab != process_vocab_len:
-                raise ValueError(f"Model's d_vocab ({self.model.d_vocab}) doesn't match dataset process's vocab_len ({process_vocab_len})")
+                raise ValueError(
+                    f"Model's d_vocab ({self.model.d_vocab}) doesn't match dataset "
+                    + f"process's vocab_len ({process_vocab_len})"
+                )
         return self
 
     def init_logger(self) -> Log:
@@ -189,7 +208,8 @@ class TrainConfig(Config):
             wandb_api_key = os.environ.get("WANDB_API_KEY", None)
             if wandb_api_key is None:
                 raise ValueError(
-                    "To use wandb, set your API key as the environment variable `WANDB_API_KEY`"
+                    "To use wandb, set your API key as the environment variable "
+                    + "`WANDB_API_KEY`"
                 )
 
             wandb.login(key=wandb_api_key)

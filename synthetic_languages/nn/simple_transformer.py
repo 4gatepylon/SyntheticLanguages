@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 # TODO(Adriano) dumb this in favor of existing hooked transformers and the like!
 class Head(nn.Module):
     def __init__(self, input_size, d_model, d_head):
@@ -23,10 +24,10 @@ class Head(nn.Module):
         A = A.masked_fill(self.mask == 0, float("-inf"))
         A = F.softmax(A, dim=-1)  # the rows of A sum to 1
         # apply the attention weights
-        O = torch.einsum(
-            "bij,bjd->bid", A, V
-        )  # this is the output of the attention head, we weight the values by the attention weights
-        return O
+
+        # this is the output of the attention head, we weight the values by
+        # the attention weights
+        return torch.einsum("bij,bjd->bid", A, V)
 
 
 class MLP(nn.Module):

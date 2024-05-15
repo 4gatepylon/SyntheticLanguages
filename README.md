@@ -7,11 +7,11 @@ For a tutorial on how to use this library check out our documentation: .
 ## What is this?
 This is a library and set of tools to easily form synthetic languages of varying difficulties for the purpose of understanding the capabilities of the current generation of large language models.
 
-Having a ground truth of some form can be very helpful when trying to do (mechanistic) interpretability (MI) on (large) language models. We do not know how to model the english language very deeply (at least AFAIK), so it is hard to get a good sense for what language models _might_ be learning to do: how they are actually _processing_ the input they recieve to predict tokens.
+Having a ground truth of some form can be very helpful when trying to do (mechanistic) interpretability (MI) on (large) language models. We do not know how to model the english language very deeply (at least AFAIK), so it is hard to get a good sense for what language models _might_ be learning to do: how they are actually _processing_ the input they receive to predict tokens.
 
 Some research (https://transformer-circuits.pub/2023/monosemantic-features) has shown that it is possible to find features that correspond to known concepts, and others (i.e. https://openreview.net/forum?id=NpsVSN6o4ul) have found _circuits_ with mild success. Because MI is hard, people have also tried to do circuit analysis on algorithmic tasks (i.e. https://arxiv.org/pdf/2306.17844) and some made up sequences (i.e. https://www.youtube.com/watch?v=yo4QvDn-vsU&ab_channel=NeelNanda for the purposes of understanding the capabilities of transformers). This latter approach appears to be easier than doing MI directly on models of real language (for obvious reasons) but it's not as useful for understanding real world behavior.
 
-What if we could bridge that gap? In computer vision we have datasets ranging from the most basic (MNIST, CIFAR) to more standard ones such as ImageNet and CoCo, as well as specific and realistic ones (though these may be prioritary in some cases). Generally, you can see that there is a ramp from simple problems to more complicated ones. Do we have such a situation in language? Sort of: algorithmic problems currently post as the "simple" ones, but it's not clear if there's such a clear ramp up into real language going through intermediate difficulty problems.
+What if we could bridge that gap? In computer vision we have datasets ranging from the most basic (MNIST, CIFAR) to more standard ones such as ImageNet and CoCo, as well as specific and realistic ones (though these may be priority in some cases). Generally, you can see that there is a ramp from simple problems to more complicated ones. Do we have such a situation in language? Sort of: algorithmic problems currently post as the "simple" ones, but it's not clear if there's such a clear ramp up into real language going through intermediate difficulty problems.
 
 And thus our proposed solution: to create synthetic languages that scale as continuously as possible from very easy to understand (for an LLM) to very hard. What can be made here is open and collaboration is welcome, but there are two main goals:
 1. That the languages enable us to learn with certainty an expediency what the LLM learned
@@ -39,7 +39,7 @@ The `synthetic_languages` package is very new and a work in progress. Currently 
 - Automatic interpretability tooling
     - Integrate https://github.com/neelnanda-io/TransformerLens
     - NLP equivalent of https://github.com/ttumiel/interpret (generate inputs that maximize)
-    - SAE and SAE Viz support: intgrate https://github.com/callummcdougall/sae_vis
+    - SAE and SAE Viz support: integrate https://github.com/callummcdougall/sae_vis
     - Algorithms to pattern match and search the LLM for weights or activation patterns that look like the generating algorithm or have some relation to it (open-ended, WIP)
 - `word2vec` embedding strategy (and generally better embedding/tokenization)
 - Languages that are subsets of existing languages (such as english), maybe even animal sounds or something else

@@ -1,26 +1,30 @@
-from typing import Iterator, List, Tuple, Dict
-from sklearn.linear_model import LinearRegression  # type: ignore
-from transformer_lens import HookedTransformer  # type: ignore
-from jaxtyping import Float
+from typing import Dict, List, Tuple
+
 import numpy as np
 import torch
+from jaxtyping import Float
+from sklearn.linear_model import LinearRegression  # type: ignore
+from transformer_lens import HookedTransformer  # type: ignore
 
-from synthetic_languages.process.MixedStateTree import MixedStateTree
 from synthetic_languages.process.Process import Process
 from synthetic_languages.process.processes import ZeroOneR
-from synthetic_languages.training.configs.training_configs import ProcessDatasetConfig
 
 # TODO: TQDM find_msp_subpace_in_residual_stream
 # TODO: (??) _generate_belief_state_and_activation() (??)
 # TODO: Make dataclass for ground_truth & predicted_belief states
 # TODO: Abstract persister & make persister for the dataclass
 
-# TODO: All of this passing of the process around is unnecessary. I just gotta pass the msp around and that's it
-# TODO: This train/test split is unnatural.... I may want to fix it or leave a None options
-# TODO: For non toy models, derive_mixed_state_presentation needs to be parallelized
+# TODO: All of this passing of the process around is unnecessary.
+#    I just gotta pass the msp around and that's it
+# TODO: This train/test split is unnatural.... I may want to fix it
+#    or leave a None options
+# TODO: For non toy models, derive_mixed_state_presentation needs
+#    to be parallelized
 # TODO: Move _predicted_mixed_state_belief_vector to MSP class (??)
-# TODO: Refactor this whole mess so that you only have to iterate through the samples list once foo
-# TODO: Generalize for the case when we have to extract multiple different parts of the residual stream
+# TODO: Refactor this whole mess so that you only have to iterate through
+#    the samples list once foo
+# TODO: Generalize for the case when we have to extract multiple different
+#    parts of the residual stream
 # TODO: Add batch_size to generate_belief_state_and_activations
 
 
@@ -30,7 +34,8 @@ def get_beliefs_for_transformer_inputs(
     tree_paths: List[List[int]],
     tree_beliefs: List[List[float]],
 ) -> Tuple[
-    Float[torch.Tensor, "batch n_ctx belief_dim"], Float[torch.Tensor, "batch n_ctx"]
+    Float[torch.Tensor, "batch n_ctx belief_dim"],
+    Float[torch.Tensor, "batch n_ctx"],
 ]:
     batch, n_ctx = transformer_inputs.shape
     belief_dim = len(list(msp_belief_index.keys())[0])
@@ -48,7 +53,9 @@ def get_beliefs_for_transformer_inputs(
             belief_state = path_belief_dict[tuple(input_substring)]
             belief_state = np.round(belief_state, 5)
             X_beliefs[i, j] = torch.tensor(
-                belief_state, dtype=torch.float32, device=transformer_inputs.device
+                belief_state,
+                dtype=torch.float32,
+                device=transformer_inputs.device,
             )
             X_belief_indices[i, j] = msp_belief_index[tuple(belief_state)]
 
@@ -70,7 +77,7 @@ def generate_belief_state_and_activations(
     # Create the Mixed State Presentation Tree
     msp_tree = process.derive_mixed_state_presentation(
         depth=model.cfg.n_ctx + 1
-    )  # For really large models this should definately be parallelized
+    )  # For really large models this should definitely be parallelized
 
     belief_states = []
     activations = []

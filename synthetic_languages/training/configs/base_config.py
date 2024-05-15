@@ -1,6 +1,7 @@
 import pathlib
-from pydantic import BaseModel
+
 import yaml
+from pydantic import BaseModel
 
 
 class Config(BaseModel, extra="forbid"):

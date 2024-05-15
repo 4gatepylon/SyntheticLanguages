@@ -26,7 +26,7 @@ my_lang = MarkovLangauge(
     average_entropy=4,
     entropy_stdev=2,
     entropy_units='bits',
-    # Your langauge name can be used to identify it for experiments and recognize its definition file
+    # Your language name can be used to identify it for experiments and recognize its definition file
     language_name='my_experiment',
     language_author='my_name'
     # Markov languages have markov-chain (FSM) - specific parameters
