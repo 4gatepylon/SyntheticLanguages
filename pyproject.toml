@@ -1,3 +1,30 @@
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[project]
+name = "synthetic_languages"
+version = "0.2"
+description = "Generate fake languages spanning hidden markov models to much more so as to understand how neural networks learn to model the world."
+dependencies = [
+    "torch",
+    "numpy",
+    "pandas",
+    "seaborn",
+    "matplotlib",
+    "wandb",
+    "scikit-learn",
+    "plotly",
+    "transformer_lens",
+    "pytest",
+    "PyDrive",
+    "black",
+    "mypy",
+    "jaxtyping",
+    "fire",
+    "pydantic",
+    "wandb",
+    "python-dotenv",
+    "tqdm",
+    "boto3"
+]
