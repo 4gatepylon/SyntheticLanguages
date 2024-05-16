@@ -1,6 +1,5 @@
 [tool.poetry]
-# Package mode tells poetry that this is going to be a pip-style package
-package-mode = true
+# Package mode (default) tells poetry that this is going to be a pip-style package
 name = "synthetic-languages"
 version = "0.2.0"
 description = "Generate fake languages spanning hidden markov models to much more so as to understand how neural networks learn to model the world."

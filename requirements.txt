@@ -1,0 +1,30 @@
+# Documentation, Developer-tools
+Sphinx
+poetry
+# Easy of developer experience, typing, etc...
+fancy-einsum
+einops
+jaxtyping
+pydantic
+# Numerical Computation
+numpy
+scipy
+pandas
+torchvision
+torchaudio
+# Interfacing
+click
+tqdm
+# HF
+datasets
+transformers
+# Interpretability
+transformer-lens
+circuitsvis
+# Vis
+plotly
+matplotlib
+# Jupyter lab: https://jupyter.org/install
+notebook
+jupyterlab
+ipywidgets
