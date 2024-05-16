@@ -5,13 +5,13 @@ import numpy as np
 from scipy.optimize import minimize_scalar  # type: ignore
 
 
-def compute_block_entropy(sequence: List[int], max_block_length: int) -> np.ndarray:
+def compute_block_entropy(seq: List[int], mx_blk_ln: int) -> np.ndarray:
     """Compute the block entropy for blocks of varying lengths."""
     block_entropies = []
 
-    for L in range(1, max_block_length + 1):
+    for L in range(1, mx_blk_ln + 1):
         # Create blocks of length L
-        blocks = [tuple(sequence[i : i + L]) for i in range(len(sequence) - L + 1)]
+        blocks = [tuple(seq[i : i + L]) for i in range(len(seq) - L + 1)]
 
         # Compute the probability distribution of the blocks
         block_counts = Counter(blocks)
@@ -27,9 +27,7 @@ def compute_block_entropy(sequence: List[int], max_block_length: int) -> np.ndar
     return np.array(block_entropies)
 
 
-def compute_conditional_entropy(
-    sequence: List[int], max_block_length: int
-) -> np.ndarray:
+def compute_cond_entropy(seq: List[int], mx_blk_ln: int) -> np.ndarray:
     """
     Compute the conditional entropy H(next symbol | previous L symbols)
     for varying L.
@@ -37,9 +35,9 @@ def compute_conditional_entropy(
     conditional_entropies = []
 
     # First, compute the block entropies for all required lengths (up to L+1)
-    all_block_entropies = compute_block_entropy(sequence, max_block_length + 1)
+    all_block_entropies = compute_block_entropy(seq, mx_blk_ln + 1)
 
-    for L in range(1, max_block_length + 1):
+    for L in range(1, mx_blk_ln + 1):
         joint_entropy = all_block_entropies[L]  # Joint entropy for L+1 symbols
         block_entropy = all_block_entropies[L - 1]  # Block entropy for L symbols
 
@@ -50,9 +48,7 @@ def compute_conditional_entropy(
     return np.array(conditional_entropies)
 
 
-def compute_empirical_conditional_entropy(
-    sequence: List[int], max_block_length: int
-) -> List[float]:
+def compute_empirical_cond_entropy(seq: List[int], mx_blk_ln: int) -> List[float]:
     """
     Compute the empirical conditional entropy H(next symbol | previous L symbols)
     for varying L.
@@ -60,19 +56,14 @@ def compute_empirical_conditional_entropy(
     NUM_SYMBOLS = 2
     conditional_entropies = []
 
-    for L in range(1, max_block_length + 1):
+    for L in range(1, mx_blk_ln + 1):
         # Dictionary to store counts of observed blocks of length L followed by a symbol
         block_followed_by_symbol_counts = Counter(
-            [
-                (tuple(sequence[i : i + L]), sequence[i + L])
-                for i in range(len(sequence) - L)
-            ]
+            [(tuple(seq[i : i + L]), seq[i + L]) for i in range(len(seq) - L)]
         )
 
         # Dictionary to store counts of observed blocks of length L
-        block_counts = Counter(
-            [tuple(sequence[i : i + L]) for i in range(len(sequence) - L + 1)]
-        )
+        block_counts = Counter([tuple(seq[i : i + L]) for i in range(len(seq) - L + 1)])
 
         # Conditional entropy computation
         entropy = 0.0
@@ -85,7 +76,7 @@ def compute_empirical_conditional_entropy(
                 )
                 if conditional_prob > 0:
                     entropy -= (
-                        (block_count / len(sequence))
+                        (block_count / len(seq))
                         * conditional_prob
                         * np.log(conditional_prob)
                     )
@@ -106,7 +97,7 @@ def inverse_binary_entropy(target_entropy: float) -> float:
     """Find the probability p corresponding to a given binary entropy value."""
 
     # Objective function: the difference between target entropy and binary entropy of p
-    def objective(p):
+    def objective(p: float):
         return (binary_entropy(p) - target_entropy) ** 2
 
     # Minimize the objective function to find p

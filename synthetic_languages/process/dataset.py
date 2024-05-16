@@ -1,10 +1,10 @@
-from typing import Dict, Iterable, List, Tuple
+from typing import Any, Dict, Iterator, List, Tuple
 
 import torch
 from jaxtyping import Float
 from torch.utils.data import IterableDataset
 
-from synthetic_languages.process.Process import Process
+from synthetic_languages.process.process import Process
 from synthetic_languages.process.processes import PROCESS_REGISTRY
 
 # TODO: Create a custom dataloader so you don't have to import the collate_function
@@ -16,10 +16,11 @@ from synthetic_languages.process.processes import PROCESS_REGISTRY
 
 
 class ProcessDataset(IterableDataset):
-    samples: Iterable[int]
-    process_params: Dict[str, float]
-    sequence_length: int
-    num_samples: int
+    # TODO(Adriano)
+    # samples: Iterable[int]
+    # process_params: Dict[str, float]
+    # sequence_length: int
+    # num_samples: int
 
     def __init__(
         self,
@@ -38,7 +39,7 @@ class ProcessDataset(IterableDataset):
             )
         process: Process = process_class(**process_params)
 
-        self.samples = process.yield_emissions(
+        self.samples: Iterator[int] = process.yield_emissions(
             sequence_len=num_samples * (sequence_length + 1)
         )
         self.sequence_length = sequence_length
@@ -47,7 +48,7 @@ class ProcessDataset(IterableDataset):
     def __len__(self):
         return self.num_samples
 
-    def __iter__(self) -> Iterable[Tuple[List[int], List[int]]]:
+    def __iter__(self, sentinel: Any = None) -> Iterator[Tuple[List[int], List[int]]]:
         for _ in range(self.num_samples):
             process_history = [
                 next(self.samples) for _ in range(self.sequence_length + 1)

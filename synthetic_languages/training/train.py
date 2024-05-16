@@ -1,5 +1,6 @@
 import pathlib
 import random
+from typing import Any, Tuple
 
 import fire  # type: ignore
 import numpy as np
@@ -32,7 +33,7 @@ from synthetic_languages.training.configs.training_configs import (
 # TODO: Add DP
 
 
-def _set_random_seed(seed):
+def _set_random_seed(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -65,8 +66,8 @@ def _check_if_action_batch(
 
 def _evaluate_model(
     model: HookedTransformer,
-    eval_dataloader: DataLoader,
-    device: torch.device,
+    eval_dataloader: DataLoader[Any],
+    device: torch.device | str,
     log: Log,
 ) -> Log:
     with torch.no_grad():
@@ -98,11 +99,12 @@ def _evaluate_log_and_persist(
 
     log.persist()
     log.reset()
-    persister.save_model(model, tokens_trained)
+    # TODO(Adriano) fix the override type errors
+    persister.save_model(model, tokens_trained)  # type: ignore
     return log
 
 
-def train_model(config: TrainConfig) -> HookedTransformer:
+def train_model(config: TrainConfig) -> Tuple[HookedTransformer, Log]:
     device = torch.device(
         "mps"
         if torch.backends.mps.is_available()
@@ -120,6 +122,7 @@ def train_model(config: TrainConfig) -> HookedTransformer:
     persister = config.persistence.init()
     log = config.init_logger()
     model.train()
+    tokens_trained_so_far = None
     for batch_idx, (input_data, target_data) in enumerate(
         tqdm(train_dataloader, desc="Train Loop")
     ):
@@ -157,6 +160,7 @@ def train_model(config: TrainConfig) -> HookedTransformer:
             model.train()
 
     model.eval()
+    assert tokens_trained_so_far is not None
     _evaluate_log_and_persist(
         dataset_config=config.dataset,
         persister=persister,
@@ -172,7 +176,8 @@ def train_model(config: TrainConfig) -> HookedTransformer:
 
 
 def _main(config_path: pathlib.Path):
-    config: TrainConfig = TrainConfig.from_yaml(config_path)
+    config = TrainConfig.from_yaml(config_path)
+    assert isinstance(config, TrainConfig)
     train_model(config)
 
 

@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal, Tuple
 
 import datashader as ds  # type: ignore
 import datashader.transfer_functions as tf  # type: ignore
@@ -21,7 +21,9 @@ from synthetic_languages.training.configs.model_configs import RawModelConfig
 #     code
 
 
-def _project_to_simplex(points: Float[np.ndarray, "num_points num_states"]):
+def _project_to_simplex(
+    points: Float[np.ndarray, "num_points num_states"]
+) -> Tuple[Any, Any]:
     """Project points onto the 2-simplex (equilateral triangle in 2D)."""
     x = points[:, 1] + 0.5 * points[:, 2]
     y = (np.sqrt(3) / 2) * points[:, 2]
@@ -29,7 +31,9 @@ def _project_to_simplex(points: Float[np.ndarray, "num_points num_states"]):
 
 
 # Combine aggregated channels into RGB images
-def _combine_channels_to_rgb(agg_r, agg_g, agg_b, px: int):
+def _combine_channels_to_rgb(
+    agg_r: float, agg_g: float, agg_b: float, px: int
+) -> Image.Image:
     img_r = tf.shade(agg_r, cmap=["black", "red"], how="linear")
     img_g = tf.shade(agg_g, cmap=["black", "green"], how="linear")
     img_b = tf.shade(agg_b, cmap=["black", "blue"], how="linear")

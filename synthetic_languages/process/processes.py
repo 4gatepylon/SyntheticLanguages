@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import inspect
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
-from synthetic_languages.process.Process import Process
+from synthetic_languages.process.process import Process
 
 # TODO: Write test for PROCESS_REGISTRY
 # TODO: Think if you really need PROCESS_REGSITRY (if only getting called during
@@ -15,6 +15,7 @@ from synthetic_languages.process.Process import Process
 # TODO: Think through whether self.name is necessary (review it's usage in
 #     derive_mixed_state_presentation)
 # TODO: Move _create_hmm into the init function prior to super()__init__()
+# TODO(Adriano) fix type ignore annotations
 
 
 class ZeroOneR(Process):
@@ -24,7 +25,7 @@ class ZeroOneR(Process):
         self.p = prob_of_zero_from_r_state
         super().__init__()
 
-    def _create_hmm(self):
+    def _create_hmm(self) -> Tuple[np.ndarray, Dict[str, int]]:
         T = np.zeros((2, 3, 3))
         state_names = {"0": 0, "1": 1, "R": 2}
         T[0, state_names["0"], state_names["1"]] = 1.0
@@ -38,12 +39,12 @@ class ZeroOneR(Process):
 class RRXOR(Process):
     name = "rrxor"
 
-    def __init__(self, pR1=0.5, pR2=0.5):
+    def __init__(self, pR1: float = 0.5, pR2: float = 0.5):
         self.pR1 = pR1
         self.pR2 = pR2
         super().__init__()
 
-    def _create_hmm(self):
+    def _create_hmm(self) -> Tuple[np.ndarray, Dict[str, int]]:
         T = np.zeros((2, 5, 5))
         state_names = {"S": 0, "0": 1, "1": 2, "T": 3, "F": 4}
         T[0, state_names["S"], state_names["0"]] = self.pR1
@@ -61,12 +62,12 @@ class RRXOR(Process):
 class Mess3(Process):
     name = "mess3"
 
-    def __init__(self, x=0.15, a=0.6):
+    def __init__(self, x: float = 0.15, a: float = 0.6):
         self.x = x
         self.a = a
         super().__init__()
 
-    def _create_hmm(self):
+    def _create_hmm(self) -> Tuple[np.ndarray, Dict[str, int]]:
         T = np.zeros((3, 3, 3))
         state_names = {"A": 0, "B": 1, "C": 2}
         b = (1 - self.a) / 2
@@ -92,7 +93,8 @@ class TransitionMatrixProcess(Process):
         self.transition_matrix = transition_matrix
         super().__init__()
 
-    def _create_hmm(self):
+    # TODO(Adriano) Override?
+    def _create_hmm(self) -> Tuple[np.ndarray, Dict[int, int]]:  # type: ignore
         return self.transition_matrix, {
             i: i for i in range(self.transition_matrix.shape[0])
         }
@@ -101,8 +103,10 @@ class TransitionMatrixProcess(Process):
 def create_process_registry(
     by_name: bool = False, items: Optional[Dict[str, Any]] = None
 ) -> Dict[str, type]:
+    __curr_frame = inspect.currentframe()
+    assert __curr_frame is not None
     items = (
-        items if items is not None else inspect.currentframe().f_globals
+        items if items is not None else __curr_frame.f_globals
     )  # Globals is a way to get access to outside the func AFAIK
     d = {
         key: value
@@ -121,6 +125,8 @@ def create_process_registry(
 
 
 # Pass the current frame locals so we are not getting some giga globals if available
+__curr_frame = inspect.currentframe()
+assert __curr_frame is not None
 PROCESS_REGISTRY: Dict[str, type] = create_process_registry(
-    by_name=True, items=inspect.currentframe().f_locals
+    by_name=True, items=__curr_frame.f_locals
 )

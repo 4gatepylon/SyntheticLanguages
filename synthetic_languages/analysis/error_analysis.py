@@ -5,9 +5,8 @@ from scipy.optimize import minimize_scalar  # type: ignore
 
 NUM_SYMBOLS = 2
 
-
-def compute_minimum_error(epsilon_machine: np.ndarray) -> float:
-    raise NotImplementedError
+# def compute_minimum_error(epsilon_machine: np.ndarray) -> float:
+#     raise NotImplementedError
 
 
 def binary_entropy(p: float) -> float:
@@ -21,7 +20,7 @@ def inverse_binary_entropy(target_entropy: float) -> float:
     """Find the probability p corresponding to a given binary entropy value."""
 
     # Objective function: the difference between target entropy and binary entropy of p
-    def objective(p):
+    def objective(p: float):
         return (binary_entropy(p) - target_entropy) ** 2
 
     # Minimize the objective function to find p

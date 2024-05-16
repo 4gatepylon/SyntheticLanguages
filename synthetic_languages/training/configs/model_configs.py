@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 import torch
 from transformer_lens import HookedTransformer, HookedTransformerConfig  # type: ignore
@@ -16,8 +16,10 @@ class RawModelConfig(Config):
     n_layers: int
 
     def to_hooked_transformer(
-        self, device: torch.device, seed: Optional[int] = None
+        self, device: Optional[Union[str, torch.device]], seed: Optional[int] = None
     ) -> HookedTransformer:
+        device = str(device) if isinstance(device, torch.device) else device
+        assert device is None or isinstance(device, str)
         config = HookedTransformerConfig(
             d_model=self.d_model,
             d_head=self.d_head,

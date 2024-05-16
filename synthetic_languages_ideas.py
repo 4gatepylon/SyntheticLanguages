@@ -1,3 +1,4 @@
+# pyright: skip-file
 import abc
 import enum
 from typing import List, Union

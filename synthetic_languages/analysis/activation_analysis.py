@@ -6,7 +6,7 @@ from jaxtyping import Float
 from sklearn.linear_model import LinearRegression  # type: ignore
 from transformer_lens import HookedTransformer  # type: ignore
 
-from synthetic_languages.process.Process import Process
+from synthetic_languages.process.process import Process
 from synthetic_languages.process.processes import ZeroOneR
 
 # TODO: TQDM find_msp_subpace_in_residual_stream

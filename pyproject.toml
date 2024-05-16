@@ -77,9 +77,11 @@ select = ["F", "E", "W", "I001"]
 ignore = ["F722"]
 
 [tool.pyright]
-ignore = []
+# TODO(Adriano) these two files will be fixed later
+ignore = ["synthetic_languages_ideas.py", "grid_ideas.py"]
 reportMissingParameterType = true
-reportUnknownParameterType = true
+# TODO(Adriano) very annoying issue with jaxtyping
+reportUnknownParameterType = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

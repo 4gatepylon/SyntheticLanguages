@@ -1,9 +1,9 @@
 from collections import deque
-from typing import List, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 import numpy as np
 from jaxtyping import Float
-from scipy.stats import entropy  # type: ignore
+from scipy.stats import entropy
 
 # TODO: Move the derive MSP function to be in the MSP init
 # TODO: Add
@@ -48,7 +48,7 @@ class MixedStateTree:
     @property
     def paths_and_belief_states(
         self,
-    ) -> Tuple[List[List[int]], Float[np.ndarray, " n_states"]]:
+    ) -> Tuple[List[List[int]], List[Float[np.ndarray, " n_states"]]]:
         paths_and_beliefs = [(x.path, x.state_prob_vector) for x in self.nodes]
         paths = [x[0] for x in paths_and_beliefs]
         beliefs = [x[1] for x in paths_and_beliefs]
@@ -136,7 +136,9 @@ class MixedStateTree:
         max_state_index = (
             -1
         )  # To keep track of the last index assigned to a unique state
-        queue = deque(
+        queue: deque[
+            Tuple[MixedStateTreeNode, Optional[int], Optional[int], Optional[float]]
+        ] = deque(
             [(self.root_node, None, -1, 0)]
         )  # (node, emitted_symbol, parent_state_index, emission_prob)
         # get the number of symbols by looking at all entries of all paths and finding

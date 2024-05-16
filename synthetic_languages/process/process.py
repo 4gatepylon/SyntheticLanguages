@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections import deque
 from dataclasses import dataclass
-from typing import Dict, Iterator, List, Optional, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 import numpy as np
 from jaxtyping import Float
@@ -201,7 +201,9 @@ class Process(ABC):
         )
         nodes = set([tree_root])
 
-        stack = deque([(tree_root, self.steady_state_vector, [], 0)])
+        stack: deque[Tuple[MixedStateTreeNode, np.ndarray, List[Any], int]] = deque(
+            [(tree_root, self.steady_state_vector, [], 0)]
+        )
         while stack:
             current_node, state_prob_vector, current_path, current_depth = stack.pop()
             if current_depth < depth:
@@ -238,7 +240,8 @@ class Process(ABC):
 
 
 def _compute_emission_probabilities(
-    hmm: Process, state_prob_vector: Float[np.ndarray, " num_states"]
+    hmm: Process,
+    state_prob_vector: Float[np.ndarray, " num_states"],
 ) -> Float[np.ndarray, " vocab_len"]:
     """
     Compute the probabilities associated with each emission given the current mixed
@@ -251,7 +254,7 @@ def _compute_emission_probabilities(
 
 
 def _compute_next_distribution(
-    epsilon_machine: Float[np.ndarray, "vocab_len num_states num_states"],
+    eps_machine: Float[np.ndarray, "vocab_len num_states num_states"],
     current_state_prob_vector: Float[np.ndarray, " num_states"],
     current_emission: int,
 ) -> Float[np.ndarray, " num_states"]:
@@ -260,7 +263,7 @@ def _compute_next_distribution(
     """
     X_next = np.einsum(
         "sd, s -> d",
-        epsilon_machine[current_emission],
+        eps_machine[current_emission],
         current_state_prob_vector,
     )
     return X_next / np.sum(X_next) if np.sum(X_next) != 0 else X_next

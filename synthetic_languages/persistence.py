@@ -2,19 +2,19 @@ import json
 import os
 import pathlib
 import re
-from abc import ABC, abstractmethod
+from abc import ABC
 from io import BytesIO
-from typing import Dict, List, OrderedDict, Tuple, TypeVar
+from typing import Any, Dict, List, Optional, OrderedDict, Tuple
 
 import boto3  # type: ignore
 import dotenv
 import pandas as pd
 import torch
+import torch.nn as nn
 from botocore.exceptions import ClientError  # type: ignore
 
 from synthetic_languages.training.configs.model_configs import RawModelConfig
 
-TorchModule = TypeVar("TorchModule", bound=torch.nn.modules.Module)
 # TODO: LocalPersister.load_model
 # TODO: Add create_bucket option in S3 persister
 
@@ -36,19 +36,21 @@ TorchModule = TypeVar("TorchModule", bound=torch.nn.modules.Module)
 
 
 class Persister(ABC):
-    collection_location: pathlib.Path | str
+    # TODO(Adriano) consider bringing this back but it just spews type-errors and sucks
+    # @abstractmethod
+    # def save_model(self, model: nn.Module, num_tokens_trained: int):
+    #     ...
 
-    @abstractmethod
-    def save_model(self, model: TorchModule, num_tokens_trained: int):
-        ...
+    # @abstractmethod
+    # def load_model(
+    #    self, model_class: nn.Module, object_name: pathlib.Path | str
+    # ) -> nn.Module:
+    #     ...
 
-    @abstractmethod
-    def load_model(self, model_class: TorchModule, object_name: str) -> TorchModule:
-        ...
-
-    @abstractmethod
-    def _save_overwrite_protection(self, object_name: pathlib.Path | str):
-        ...
+    # @abstractmethod
+    # def _save_overwrite_protection(self, object_name: pathlib.Path | str):
+    #     ...
+    pass
 
 
 class LocalPersister(Persister):
@@ -58,23 +60,28 @@ class LocalPersister(Persister):
         self.collection_location: pathlib.Path = collection_location
 
     def _save_overwrite_protection(
-        self, object_name: pathlib.Path
+        self, object_name: pathlib.Path | str
     ):  # type: ignore[override]
+        if isinstance(object_name, str):
+            object_name = pathlib.Path(object_name)
+        assert isinstance(object_name, pathlib.Path)
         if object_name.exists():
             raise ValueError(f"Overwrite Protection: {object_name} already exists.")
 
-    def save_model(self, model: TorchModule, num_tokens_trained: int):
+    def save_model(self, model: nn.Module, num_tokens_trained: int):
         save_path = self.collection_location / f"{num_tokens_trained}.pt"
         self._save_overwrite_protection(object_name=save_path)
 
         print(f"Saving model to {save_path}")
         torch.save(model.state_dict(), save_path)
 
-    def load_model(self, model: TorchModule, object_name: str) -> TorchModule:
+    def load_model(
+        self, model: nn.Module, object_name: pathlib.Path | str
+    ) -> nn.Module:
+        # state_dict = torch.load(self.collection_location / object_name)
+        # model.load_state_dict(state_dict=state_dict)
+        # return model
         raise NotImplementedError
-        state_dict = torch.load(self.collection_location / object_name)
-        model.load_state_dict(state_dict=state_dict)
-        return model
 
 
 class S3Persister(Persister):
@@ -105,7 +112,7 @@ class S3Persister(Persister):
             else:
                 raise ValueError(f"Expected 404 from empty object, received {e}")
 
-    def save_model(self, model: TorchModule, num_tokens_trained: int):
+    def save_model(self, model: nn.Module, num_tokens_trained: int):
         object_name = f"{num_tokens_trained}.pt"
         self._save_overwrite_protection(object_name=object_name)
 
@@ -116,13 +123,13 @@ class S3Persister(Persister):
         buffer.seek(0)
         self.s3.upload_fileobj(buffer, self.collection_location, object_name)
 
-    def load_csv(self, object_name: str) -> str:
+    def load_csv(self, object_name: str) -> pd.DataFrame:
         download_buffer = BytesIO()
         self.s3.download_fileobj(self.collection_location, object_name, download_buffer)
         download_buffer.seek(0)
         return pd.read_csv(download_buffer)
 
-    def load_model(self, object_name: str, device: torch.device) -> TorchModule:
+    def load_model(self, object_name: str, device: torch.device) -> nn.Module:
         download_buffer = BytesIO()
         self.s3.download_fileobj(self.collection_location, object_name, download_buffer)
         download_buffer.seek(0)
@@ -152,6 +159,7 @@ class S3Persister(Persister):
 
         model = config.to_hooked_transformer(device=device)
         model.load_state_dict(state_dict=state_dict)
+        assert isinstance(model, nn.Module)  # typing
         return model
 
     def list_objects(self) -> List[str]:
@@ -174,7 +182,7 @@ class S3Persister(Persister):
 
         return objects
 
-    def load_json(self, object_name: str) -> Dict:
+    def load_json(self, object_name: str) -> Optional[Dict[str, Any]]:
         try:
             json_str = self.load_object(object_name)
             return json.loads(json_str)
@@ -192,7 +200,7 @@ class S3Persister(Persister):
 
 
 def _state_dict_to_model_config(
-    state_dict: OrderedDict, n_ctx: int = 10
+    state_dict: OrderedDict[str, Any], n_ctx: int = 10
 ) -> RawModelConfig:
     # Naming => Hack for line length
     FGOENDSFGS: Dict[str, List[Tuple[str, int]]] = {
@@ -229,16 +237,19 @@ def _state_dict_to_model_config(
         )
         return out[0]
 
-    def _extract_n_layers(state_dict: OrderedDict) -> int:
+    def _extract_n_layers(state_dict: OrderedDict[str, Any]) -> int:
         highest_block_idx = None
         for key in state_dict.keys():
             if not bool(re.match(r"blocks\.\d+\.", key)):
                 continue
-            local_block_idx = int(re.search(r"\d+", key).group())
+            _search = re.search(r"\d+", key)
+            assert _search is not None
+            local_block_idx = int(_search.group())
             if highest_block_idx is None:
                 highest_block_idx = local_block_idx
             elif local_block_idx > highest_block_idx:
                 highest_block_idx = local_block_idx
+        assert highest_block_idx is not None
         return highest_block_idx + 1
 
     param_dict = dict(
@@ -267,6 +278,6 @@ if __name__ == "__main__":
     from transformer_lens import HookedTransformer  # type: ignore
 
     persister = S3Persister(collection_location="mess3-param-change")
-    model: HookedTransformer = persister.load_model(
-        device=torch.device("cpu"), object_name="4800000.pt"
-    )
+    model = persister.load_model(device=torch.device("cpu"), object_name="4800000.pt")
+    assert isinstance(model, nn.Module)
+    assert isinstance(model, HookedTransformer)

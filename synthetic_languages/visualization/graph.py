@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import networkx as nx  # type: ignore
@@ -7,12 +7,12 @@ from jaxtyping import Float
 
 from synthetic_languages.analysis.entropy_analysis import (
     compute_block_entropy,
-    compute_conditional_entropy,
-    compute_empirical_conditional_entropy,
+    compute_cond_entropy,
+    compute_empirical_cond_entropy,
 )
 
 
-def determine_layout(G, layout_type):
+def determine_layout(G: Any, layout_type: str) -> Any:
     """Determine the layout of the graph."""
     layout_funcs = {
         "spring": nx.spring_layout,
@@ -36,7 +36,7 @@ def determine_layout(G, layout_type):
     return layout_func(G)
 
 
-def hierarchical_layout(G):
+def hierarchical_layout(G: Any) -> Any:
     """Generate a hierarchical layout for the graph."""
     # This is a simple hierarchical layout and might need adjustments based on the exact
     # graph structure
@@ -61,7 +61,7 @@ def hierarchical_layout(G):
     return pos
 
 
-def get_colors():
+def get_colors() -> Dict[str, str]:
     """Return the colors used in the graph."""
     return {
         "transitory": "#A1D4C0",
@@ -71,7 +71,13 @@ def get_colors():
     }
 
 
-def draw_nodes(G, pos, transitory_states, colors, draw_mixed_state):
+def draw_nodes(
+    G: Any,
+    pos: Any,
+    transitory_states: Any,
+    colors: Dict[str, Any],
+    draw_mixed_state: bool,
+) -> None:
     """Draw nodes on the graph."""
     for node in G.nodes():
         if draw_mixed_state:
@@ -117,7 +123,14 @@ def draw_nodes(G, pos, transitory_states, colors, draw_mixed_state):
             )
 
 
-def draw_edges(G, pos, transitory_edges, colors, draw_color, draw_mixed_state):
+def draw_edges(
+    G: Any,
+    pos: Any,
+    transitory_edges: Any,
+    colors: Dict[str, Any],
+    draw_color: Any,
+    draw_mixed_state: bool,
+) -> None:
     """Draw edges on the graph."""
     for idx, edge in enumerate(G.edges(data=True)):
         edge_color = colors["edge_standard"]
@@ -169,7 +182,7 @@ def draw_edges(G, pos, transitory_edges, colors, draw_color, draw_mixed_state):
                 )
 
 
-def identify_recurrent_states(G):
+def identify_recurrent_states(G: Any) -> Any:
     """Identify the recurrent states of the graph."""
     sccs = list(nx.strongly_connected_components(G))
 
@@ -190,13 +203,13 @@ def identify_recurrent_states(G):
 
 
 def visualize_graph(
-    G,
-    layout="spring",
-    draw_edge_labels=True,
-    draw_color=False,
-    draw_mixed_state=False,
-    pdf=None,
-):
+    G: Any,
+    layout: str = "spring",
+    draw_edge_labels: bool = True,
+    draw_color: bool = False,
+    draw_mixed_state: bool = False,
+    pdf: Optional[Any] = None,
+) -> None:
     pos = determine_layout(G, layout)
 
     recurrent_states = identify_recurrent_states(G)
@@ -232,7 +245,7 @@ def visualize_graph(
         plt.show()
 
 
-def plot_block_entropy_diagram(sequence: List[int], max_block_length: int):
+def plot_block_entropy_diagram(sequence: List[int], max_block_length: int) -> None:
     """Plot the block entropy diagram."""
     block_entropies = compute_block_entropy(sequence, max_block_length)
 
@@ -250,9 +263,11 @@ def plot_block_entropy_diagram(sequence: List[int], max_block_length: int):
     plt.show()
 
 
-def plot_conditional_entropy_diagram(sequence: List[int], max_block_length: int):
+def plot_conditional_entropy_diagram(
+    sequence: List[int], max_block_length: int
+) -> None:
     """Plot the conditional entropy diagram."""
-    conditional_entropies = compute_conditional_entropy(sequence, max_block_length)
+    conditional_entropies = compute_cond_entropy(sequence, max_block_length)
 
     plt.figure(figsize=(10, 6))
     plt.plot(
@@ -270,11 +285,9 @@ def plot_conditional_entropy_diagram(sequence: List[int], max_block_length: int)
 
 def plot_empirical_conditional_entropy_diagram(
     sequence: List[int], max_block_length: int
-):
+) -> None:
     """Plot the empirical conditional entropy diagram."""
-    conditional_entropies = compute_empirical_conditional_entropy(
-        sequence, max_block_length
-    )
+    conditional_entropies = compute_empirical_cond_entropy(sequence, max_block_length)
 
     plt.figure(figsize=(10, 6))
     plt.plot(
@@ -291,17 +304,17 @@ def plot_empirical_conditional_entropy_diagram(
 
 
 def transition_matrix_to_graph(
-    transition_matrix: Float[np.ndarray, "vocab_len num_states num_states"],
+    tmat: Float[np.ndarray, "vocab_len num_states num_states"],
     state_names: Optional[Dict[str, int]] = None,
-) -> nx.DiGraph:
+) -> nx.DiGraph[Any]:
     """
     Convert a transition matrix to a graph.
 
     Parameters:
-    transition_matrix (np.ndarray): The transition matrix of shape
+    tmat (np.ndarray): The transition matrix of shape
                                     (n_outputs, n_states, n_states).
                                     n_states is the number of states in the machine.
-                                    transition_matrix[i, j, k] is the probability of
+                                    tmat[i, j, k] is the probability of
                                     transitioning from state j to state k on output i.
     state_names (Dict[str, int], optional):
                                     A dictionary mapping state names to state indices.
@@ -310,18 +323,21 @@ def transition_matrix_to_graph(
     nx.DiGraph: The graph representation of the transition matrix.
     """
     # Get the number of outputs and states
-    n_outputs, n_states, _ = transition_matrix.shape
+    n_outputs, n_states, _ = tmat.shape
 
     # Create an empty directed graph
     G = nx.MultiDiGraph()
 
     # Invert the state_names dictionary if it's provided
+    state_names_inv: Optional[Dict[int, str]] = None
     if state_names:
-        state_names = {v: k for k, v in state_names.items()}
+        assert state_names is not None
+        state_names_inv = {v: k for k, v in state_names.items()}
+    assert state_names_inv is None == state_names is None
 
     # Add nodes to the graph
     for i in range(n_states):
-        node_label = state_names[i] if state_names else i
+        node_label: str | int = state_names_inv[i] if state_names_inv else i
         G.add_node(node_label)
 
     # Add edges to the graph for each transition in the epsilon machine
@@ -331,14 +347,14 @@ def transition_matrix_to_graph(
                 # Add an edge from state j to state k with label i and weight equal to
                 # the transition probability only if the transition probability is not
                 # zero
-                if transition_matrix[i, j, k] != 0:
-                    from_node = state_names[j] if state_names else j
-                    to_node = state_names[k] if state_names else k
+                if tmat[i, j, k] != 0:
+                    from_node: str | int = state_names_inv[j] if state_names_inv else j
+                    to_node: str | int = state_names_inv[k] if state_names_inv else k
                     G.add_edge(
                         from_node,
                         to_node,
                         label=str(i),
-                        weight=transition_matrix[i, j, k],
+                        weight=tmat[i, j, k],
                     )
 
     return G

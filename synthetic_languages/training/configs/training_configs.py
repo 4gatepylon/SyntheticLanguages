@@ -2,7 +2,7 @@ import math
 import os
 import pathlib
 from dataclasses import asdict, dataclass
-from typing import Dict, Literal, Optional, Union
+from typing import Any, Dict, Literal, Optional, Union
 
 import dotenv
 import torch
@@ -104,7 +104,7 @@ class ProcessDatasetConfig(Config):
     num_tokens: int
     test_split: float
 
-    def to_dataloader(self, sequence_length: int, train: bool) -> DataLoader:
+    def to_dataloader(self, sequence_length: int, train: bool) -> DataLoader[Any]:
         dataset = ProcessDataset(
             process_name=self.process,
             process_params=self.process_params,
@@ -141,8 +141,10 @@ class Log:
 
     def update_metrics(self, train_or_test: Literal["train", "test"], loss: float):
         if train_or_test == "train" and self.config.test_loss:
+            assert self.train_loss
             self.train_loss += loss
         elif train_or_test == "test" and self.config.train_loss:
+            assert self.test_loss
             self.test_loss += loss
         else:
             raise ValueError

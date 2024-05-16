@@ -1,8 +1,8 @@
 # Setup jupyter: https://code.visualstudio.com/docs/datascience/jupyter-notebooks
 from pathlib import Path
 
-from epsilon_transformers.training.configs.model_configs import RawModelConfig
-from epsilon_transformers.training.configs.training_configs import (
+from synthetic_languages.training.configs.model_configs import RawModelConfig
+from synthetic_languages.training.configs.training_configs import (
     LoggingConfig,
     OptimizerConfig,
     PersistanceConfig,
