@@ -1,4 +1,6 @@
 # WARNING: unfinished; not yet launched
+Unfortunately this project is in an indeterminate length period of hiatus.
+
 # synthetic_languages
 ## Usage
 Currently `synthetic_languages` is a `pip` installable. You can get it using `pip install synthetic_languages`.
